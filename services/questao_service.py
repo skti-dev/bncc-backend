@@ -38,3 +38,14 @@ class QuestaoService:
             return questao
         except Exception as e:
             raise Exception(f"Erro ao buscar questão: {str(e)}")
+        
+    def listar_questoes(self):
+        """Lista todas as questões"""
+        try:
+            questoes = []
+            for questao in self.collection.find():
+                questao["_id"] = str(questao["_id"])
+                questoes.append(questao)
+            return questoes
+        except Exception as e:
+            raise Exception(f"Erro ao listar questões: {str(e)}")

@@ -1,0 +1,41 @@
+{
+  "disciplina": {
+    "codigo": "MAT001",
+    "nome": "Matemática"
+  },
+  "ano": {
+    "codigo": 9,
+    "descricao": "9º Ano do Ensino Fundamental"
+  },
+  "codigo_habilidade": "EF09MA01",
+  "questao": {
+    "tipo": "multipla_escolha",
+    "enunciado": "Qual é o resultado da expressão 2x + 3 quando x = 5?",
+    "imagem": "https://exemplo.com/imagem-questao.png",
+    "alternativas": [
+      {
+        "letra": "A",
+        "texto": "10"
+      },
+      {
+        "letra": "B",
+        "texto": "13"
+      },
+      {
+        "letra": "C",
+        "texto": "15"
+      },
+      {
+        "letra": "D",
+        "texto": "8"
+      }
+    ],
+    "gabarito": "B",
+    "explicacao": "Substituindo x = 5 na expressão: 2(5) + 3 = 10 + 3 = 13"
+  },
+  "metadados": {
+    "nivel_dificuldade": "medio",
+    "tempo_estimado_segundos": 120,
+    "tags": ["algebra", "expressoes", "substituicao"]
+  }
+}
