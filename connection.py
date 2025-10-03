@@ -12,10 +12,8 @@ mongodb_host = os.getenv('MONGODB_HOST', 'db-pi-v.b1go26j.mongodb.net')
 
 uri = f"mongodb+srv://{mongodb_user}:{mongodb_pass}@{mongodb_host}"
 
-# Criar cliente MongoDB
 client = MongoClient(uri, server_api=ServerApi('1'))
 
-# Exportar o banco de dados
 database = client[database_name]
 
 def get_database():

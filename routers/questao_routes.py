@@ -1,38 +1,53 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Query
 from models.questao_model import QuestaoCreate, QuestaoResponse
 from services.questao_service import QuestaoService
 from services.log_service import LogService
+from typing import Optional, Union, List
+
+from models.questao_model import DisciplinaEnum
 
 router = APIRouter(prefix="/questoes", tags=["questoes"])
 questao_service = QuestaoService()
 log_service = LogService()
 
-@router.get("/", response_model=list[QuestaoResponse])
-async def listar_questoes(request: Request):
+questoes_endpoint = "/questoes"
+
+@router.get("/", response_model=Union[List[QuestaoResponse], dict])
+async def listar_questoes(
+    request: Request,
+    page: int = Query(..., ge=1),
+    limit: int = Query(10, ge=1, le=20),
+    disciplina: Optional[DisciplinaEnum] = Query(None),
+):
     """Lista todas as questões"""
     origem = request.client.host
     
     try:
-        questoes = questao_service.listar_questoes()
-        # Reconstruir cada documento com o Pydantic model para garantir tipos e aliases
-        questoes_serializadas = []
-        for q in questoes:
-            # QuestaoResponse pode ser validado a partir do dict retornado pelo service
-            qr = QuestaoResponse.model_validate(q)
-            questoes_serializadas.append(qr.model_dump())
-        
+        paginated = questao_service.listar_questoes_paginated(page=page, limit=limit, disciplina=(disciplina.value if disciplina else None))
+
+        total_pages = paginated.get("totalPages", 0)
+        if total_pages == 0 or page > total_pages:
+            log_service.log_consumo(
+                origem_consumo=origem,
+                resultado_consumo="sucesso",
+                endpoint=questoes_endpoint,
+                detalhes=f"page={page} out_of_range total={paginated.get('total',0)}"
+            )
+            return []
+
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="sucesso",
-            endpoint="/questoes/",
-            detalhes=f"{len(questoes)} questões listadas"
+            endpoint=questoes_endpoint,
+            detalhes=f"page={page} limit={limit} disciplina={disciplina} total={paginated.get('total',0)}"
         )
-        return questoes_serializadas
+
+        return paginated
     except Exception as e:
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="erro",
-            endpoint="/questoes/",
+            endpoint=questoes_endpoint,
             detalhes=str(e)
         )
         
@@ -52,10 +67,10 @@ async def buscar_questao(questao_id: str, request: Request):
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="sucesso",
-            endpoint=f"/questoes/{questao_id}",
+            endpoint=f"{questoes_endpoint}/{questao_id}",
             detalhes=f"Questão encontrada com ID: {questao_id}"
         )
-        # Reconstruir com Pydantic e retornar sem alias (usando 'id')
+
         qr = QuestaoResponse.model_validate(questao)
         return qr.model_dump()
     except HTTPException as he:
@@ -65,7 +80,7 @@ async def buscar_questao(questao_id: str, request: Request):
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="erro",
-            endpoint=f"/questoes/{questao_id}",
+            endpoint=f"{questoes_endpoint}/{questao_id}",
             detalhes=str(e)
         )
         
@@ -77,17 +92,15 @@ async def adicionar_questao(questao: QuestaoCreate, request: Request):
     origem = request.client.host
     
     try:
-        # Adicionar questão
         nova_questao = questao_service.adicionar_questao(questao)
 
-        # nova_questao já deve ser um dict serializado via QuestaoResponse (sem _id)
         questao_id = nova_questao.get("id")
 
         # Log de sucesso
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="sucesso",
-            endpoint="/questoes/adicionar",
+            endpoint=f"{questoes_endpoint}/adicionar",
             detalhes=f"Questão adicionada com ID: {questao_id}"
         )
 
@@ -102,7 +115,7 @@ async def adicionar_questao(questao: QuestaoCreate, request: Request):
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="erro",
-            endpoint="/questoes/adicionar",
+            endpoint=f"{questoes_endpoint}/adicionar",
             detalhes=str(e)
         )
         
