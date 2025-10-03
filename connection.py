@@ -6,9 +6,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 mongodb_pass = os.getenv('MONGODB_PASS')
-database_name = os.getenv('DATABASE_NAME', 'bncc_database')
+database_name = os.getenv('DATABASE_NAME', 'appDB')
+mongodb_user = os.getenv('MONGODB_USER', 'appLink')
+mongodb_host = os.getenv('MONGODB_HOST', 'db-pi-v.b1go26j.mongodb.net')
 
-uri = f"mongodb+srv://augustotseabra79_db_user:{mongodb_pass}@bncc-cluster.omelecl.mongodb.net/?retryWrites=true&w=majority&appName=BNCC-Cluster"
+uri = f"mongodb+srv://{mongodb_user}:{mongodb_pass}@{mongodb_host}"
 
 # Criar cliente MongoDB
 client = MongoClient(uri, server_api=ServerApi('1'))
