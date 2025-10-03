@@ -1,10 +1,11 @@
 from connection import get_collection
 from datetime import datetime
+from config.settings import settings as app_settings
 
 class LogService:
     def __init__(self):
-        self.collection = get_collection('logs_api')
-    
+        self.collection = get_collection(app_settings.LOG_COLLECTION)
+
     def log_consumo(self, origem_consumo: str, resultado_consumo: str, endpoint: str = None, detalhes: str = None):
         """Registra o consumo da API"""
         try:

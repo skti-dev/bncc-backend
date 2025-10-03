@@ -14,6 +14,12 @@ async def listar_questoes(request: Request):
     
     try:
         questoes = questao_service.listar_questoes()
+        # Reconstruir cada documento com o Pydantic model para garantir tipos e aliases
+        questoes_serializadas = []
+        for q in questoes:
+            # QuestaoResponse pode ser validado a partir do dict retornado pelo service
+            qr = QuestaoResponse.model_validate(q)
+            questoes_serializadas.append(qr.model_dump())
         
         log_service.log_consumo(
             origem_consumo=origem,
@@ -21,8 +27,7 @@ async def listar_questoes(request: Request):
             endpoint="/questoes/",
             detalhes=f"{len(questoes)} questões listadas"
         )
-        
-        return questoes
+        return questoes_serializadas
     except Exception as e:
         log_service.log_consumo(
             origem_consumo=origem,
@@ -50,9 +55,9 @@ async def buscar_questao(questao_id: str, request: Request):
             endpoint=f"/questoes/{questao_id}",
             detalhes=f"Questão encontrada com ID: {questao_id}"
         )
-        
-        return questao
-        
+        # Reconstruir com Pydantic e retornar sem alias (usando 'id')
+        qr = QuestaoResponse.model_validate(questao)
+        return qr.model_dump()
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -74,18 +79,21 @@ async def adicionar_questao(questao: QuestaoCreate, request: Request):
     try:
         # Adicionar questão
         nova_questao = questao_service.adicionar_questao(questao)
-        
+
+        # nova_questao já deve ser um dict serializado via QuestaoResponse (sem _id)
+        questao_id = nova_questao.get("id")
+
         # Log de sucesso
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="sucesso",
             endpoint="/questoes/adicionar",
-            detalhes=f"Questão adicionada com ID: {nova_questao['_id']}"
+            detalhes=f"Questão adicionada com ID: {questao_id}"
         )
-        
+
         return {
             "message": "Questão adicionada com sucesso!",
-            "questao_id": nova_questao["_id"],
+            "questao_id": questao_id,
             "questao": nova_questao
         }
         

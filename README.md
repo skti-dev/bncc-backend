@@ -48,9 +48,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ### Questões
 
 - **POST** `/questoes/adicionar` - Adiciona uma nova questão
-
 - **GET** `/questoes/{id}` - Busca uma questão específica pelo ID
-
 - **POST** `/questoes/adicionar` - Adiciona uma nova questão
 
 ## 📝 Exemplo de uso
@@ -134,7 +132,7 @@ Backend BCNN/
 
 ## 📊 Logs
 
-Todos os consumos da API são automaticamente logados na coleção `logs_api` do MongoDB, incluindo:
+Todos os consumos da API são automaticamente logados na coleção `LOGS` do MongoDB, incluindo:
 
 - Origem do consumo (IP)
 - Resultado (sucesso/erro)

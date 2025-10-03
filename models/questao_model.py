@@ -1,45 +1,42 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from pydantic import BaseModel, Field, ValidationError, model_validator
+from typing import Dict, Optional
+from enum import Enum
 
-class Disciplina(BaseModel):
-    codigo: str
-    nome: str
 
-class Ano(BaseModel):
-    codigo: int
-    descricao: str
+class DisciplinaEnum(str, Enum):
+    LP = "LP"
+    MA = "MA"
+    CI = "CI"
 
-class Alternativa(BaseModel):
-    letra: str
-    texto: str
 
-class Questao(BaseModel):
-    tipo: str
+class QuestaoInner(BaseModel):
     enunciado: str
-    imagem: Optional[str] = None
-    alternativas: List[Alternativa]
+    alternativas: Dict[str, str]
     gabarito: str
-    explicacao: str
+    url: Optional[str] = None
 
-class Metadados(BaseModel):
-    nivel_dificuldade: str
-    tempo_estimado_segundos: int
-    tags: List[str]
+    @model_validator(mode="after")
+    def validar_gabarito_esta_em_alternativas(cls, model):
+        alternativas = model.alternativas or {}
+        gabarito = model.gabarito
+        if gabarito is None:
+            raise ValueError("Campo 'gabarito' é obrigatório")
+        if str(gabarito) not in alternativas:
+            raise ValueError("'gabarito' deve ser uma das chaves de 'alternativas'")
+        return model
+
 
 class QuestaoCreate(BaseModel):
-    disciplina: Disciplina
-    ano: Ano
-    codigo_habilidade: str
-    questao: Questao
-    metadados: Metadados
+    disciplina: DisciplinaEnum
+    ano: str
+    codigo: str
+    questao: QuestaoInner
 
-class QuestaoResponse(BaseModel):
+
+class QuestaoResponse(QuestaoCreate):
     id: str = Field(alias="_id")
-    disciplina: Disciplina
-    ano: Ano
-    codigo_habilidade: str
-    questao: Questao
-    metadados: Metadados
-    
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
     class Config:
         populate_by_name = True
