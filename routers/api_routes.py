@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from routers.questao_routes import router as questao_router
 from routers.auth_routes import router as auth_router
+from routers.logs_routes import router as logs_router
 from connection import test_connection
 from config.settings import settings
 
@@ -8,6 +9,7 @@ router = APIRouter()
 
 router.include_router(questao_router)
 router.include_router(auth_router)
+router.include_router(logs_router)
 
 
 @router.get("/", tags=["health"])

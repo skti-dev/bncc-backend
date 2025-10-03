@@ -31,7 +31,7 @@ async def listar_questoes(
                 origem_consumo=origem,
                 resultado_consumo="sucesso",
                 endpoint=questoes_endpoint,
-                detalhes=f"page={page} out_of_range total={paginated.get('total',0)}"
+                detalhes={"page": page, "out_of_range": True, "total": paginated.get('total', 0)}
             )
             return []
 
@@ -39,7 +39,7 @@ async def listar_questoes(
             origem_consumo=origem,
             resultado_consumo="sucesso",
             endpoint=questoes_endpoint,
-            detalhes=f"page={page} limit={limit} disciplina={disciplina} total={paginated.get('total',0)}"
+            detalhes={"page": page, "limit": limit, "disciplina": str(disciplina) if disciplina else None, "total": paginated.get('total', 0)}
         )
 
         return paginated
@@ -48,7 +48,7 @@ async def listar_questoes(
             origem_consumo=origem,
             resultado_consumo="erro",
             endpoint=questoes_endpoint,
-            detalhes=str(e)
+            detalhes={"exception": str(e)}
         )
         
         raise HTTPException(status_code=500, detail=str(e))
@@ -63,12 +63,11 @@ async def buscar_questao(questao_id: str, request: Request):
         if not questao:
             raise HTTPException(status_code=404, detail="Questão não encontrada")
         
-        # Log de sucesso
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="sucesso",
             endpoint=f"{questoes_endpoint}/{questao_id}",
-            detalhes=f"Questão encontrada com ID: {questao_id}"
+            detalhes={"message": "Questão encontrada", "questao_id": questao_id}
         )
 
         qr = QuestaoResponse.model_validate(questao)
@@ -76,12 +75,11 @@ async def buscar_questao(questao_id: str, request: Request):
     except HTTPException as he:
         raise he
     except Exception as e:
-        # Log de erro
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="erro",
             endpoint=f"{questoes_endpoint}/{questao_id}",
-            detalhes=str(e)
+            detalhes={"exception": str(e)}
         )
         
         raise HTTPException(status_code=500, detail=str(e))
@@ -96,12 +94,11 @@ async def adicionar_questao(questao: QuestaoCreate, request: Request):
 
         questao_id = nova_questao.get("id")
 
-        # Log de sucesso
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="sucesso",
             endpoint=f"{questoes_endpoint}/adicionar",
-            detalhes=f"Questão adicionada com ID: {questao_id}"
+            detalhes={"message": "Questão adicionada", "questao_id": questao_id}
         )
 
         return {
@@ -111,12 +108,11 @@ async def adicionar_questao(questao: QuestaoCreate, request: Request):
         }
         
     except Exception as e:
-        # Log de erro
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="erro",
             endpoint=f"{questoes_endpoint}/adicionar",
-            detalhes=str(e)
+            detalhes={"exception": str(e)}
         )
         
         raise HTTPException(status_code=500, detail=str(e))

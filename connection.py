@@ -5,6 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from motor.motor_asyncio import AsyncIOMotorClient
+
 mongodb_pass = os.getenv('MONGODB_PASS')
 database_name = os.getenv('DATABASE_NAME', 'appDB')
 mongodb_user = os.getenv('MONGODB_USER', 'appLink')
@@ -16,6 +21,14 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 
 database = client[database_name]
 
+try:
+    from motor.motor_asyncio import AsyncIOMotorClient
+    async_client = AsyncIOMotorClient(uri)
+    async_database = async_client[database_name]
+except Exception:
+    async_client = None
+    async_database = None
+
 def get_database():
     """Retorna a instância do banco de dados"""
     return database
@@ -23,6 +36,13 @@ def get_database():
 def get_collection(collection_name: str):
     """Retorna uma coleção específica do banco"""
     return database[collection_name]
+
+
+def get_async_collection(collection_name: str):
+    """Retorna uma coleção assíncrona (Motor). Pode retornar None se Motor não estiver disponível."""
+    if async_database is None:
+        return None
+    return async_database[collection_name]
 
 def list_databases():
     """Lista todos os databases disponíveis"""
