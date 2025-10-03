@@ -15,8 +15,14 @@ class Settings:
     API_DESCRIPTION = "API para gerenciamento de questões do BCNN"
     API_VERSION = "1.0.0"
     
-    # Logs
+    # Collections
     LOG_COLLECTION = "LOGS"
     QUESTOES_COLLECTION = "QUESTOES"
+    USUARIOS_COLLECTION = "USUARIOS"
+
+    # Auth / JWT
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    ALGORITHM = os.getenv('ALGORITHM', 'HS256')
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', '60'))
 
 settings = Settings()
