@@ -29,8 +29,7 @@ async def log_requests(request: Request, call_next):
     
     process_time = time.time() - start_time
     
-    # Log básico
-    print(f"📝 {request.method} {request.url.path} - {response.status_code} - {process_time:.2f}s")
+    print(f"[REQ] {request.method} {request.url.path} - {response.status_code} - {process_time:.2f}s")
     
     return response
 
@@ -38,11 +37,11 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def startup_event():
-    print("🚀 Iniciando BCNN Backend API...")
+    print("Starting BCNN Backend API...")
     if test_connection():
-        print("✅ Conexão com MongoDB estabelecida!")
+        print("Connection to MongoDB established!")
     else:
-        print("❌ Falha na conexão com MongoDB!")
+        print("Failed to connect to MongoDB!")
 
 if __name__ == "__main__":
     import uvicorn
