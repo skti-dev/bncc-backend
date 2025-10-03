@@ -32,3 +32,9 @@ def login(request: LoginRequest, response: Response):
 @router.get('/me')
 def me(current_user: dict = Depends(get_current_user)):
     return {"user": current_user}
+
+
+@router.post('/logout')
+def logout(response: Response):
+    response.delete_cookie(key="access_token", path="/")
+    return {"message": "Logout realizado"}

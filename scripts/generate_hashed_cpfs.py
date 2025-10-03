@@ -16,7 +16,6 @@ from pathlib import Path
 try:
     from services.auth_service import get_password_hash
 except Exception:
-    # fallback: local implementation using bcrypt
     import bcrypt
 
     def get_password_hash(password: str) -> str:

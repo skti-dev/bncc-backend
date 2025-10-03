@@ -1,10 +1,13 @@
-from fastapi import Cookie, HTTPException, status, Depends
+from fastapi import Cookie, HTTPException, status, Request
 
 from services.auth_service import decode_token, AuthService
 from services.erros import ValidationError, NotFoundError
 
 
-def get_current_user(access_token: str | None = Cookie(default=None)):
+def get_current_user(request: Request, access_token: str | None = Cookie(default=None)):
+    if hasattr(request.state, 'user') and request.state.user is not None:
+        return request.state.user
+
     if not access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
