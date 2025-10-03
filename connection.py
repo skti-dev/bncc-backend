@@ -28,22 +28,22 @@ def list_databases():
     """Lista todos os databases disponíveis"""
     try:
         databases = client.list_database_names()
-        print("📂 Databases disponíveis:")
+        print("Databases available:")
         for db in databases:
             print(f"  - {db}")
         return databases
     except Exception as e:
-        print(f"❌ Erro ao listar databases: {e}")
+        print(f"Error listing databases: {e}")
         return []
 
 def test_connection():
     """Testa a conexão com MongoDB"""
     try:
         client.admin.command('ping')
-        print("✅ Pinged your deployment. You successfully connected to MongoDB!")
+        print("Ping successful: connected to MongoDB")
         return True
     except Exception as e:
-        print(f"❌ Connection failed: {e}")
+        print(f"Connection failed: {e}")
         return False
 
 def close_connection():
