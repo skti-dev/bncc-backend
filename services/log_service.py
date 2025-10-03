@@ -9,12 +9,13 @@ class LogService:
     def log_consumo(self, origem_consumo: str, resultado_consumo: str, endpoint: str = None, detalhes: str = None):
         """Registra o consumo da API"""
         try:
+            now_iso = datetime.utcnow().isoformat() + "Z"
             log_data = {
                 "origem_consumo": origem_consumo,
                 "resultado_consumo": resultado_consumo,
                 "endpoint": endpoint,
                 "detalhes": detalhes,
-                "timestamp": datetime.utcnow()
+                "timestamp": now_iso
             }
             
             result = self.collection.insert_one(log_data)
@@ -29,7 +30,14 @@ class LogService:
         try:
             logs = list(self.collection.find().sort("timestamp", -1).limit(limite))
             for log in logs:
-                log["_id"] = str(log["_id"])
+                log["id"] = str(log["_id"]) if "_id" in log else log.get("id")
+                if "_id" in log:
+                    del log["_id"]
+                if "timestamp" in log and not isinstance(log["timestamp"], str):
+                    try:
+                        log["timestamp"] = log["timestamp"].isoformat() + "Z"
+                    except Exception:
+                        log["timestamp"] = str(log["timestamp"])
             return logs
         except Exception as e:
             print(f"❌ Erro ao buscar logs: {e}")
@@ -44,7 +52,14 @@ class LogService:
                 .limit(limite)
             )
             for log in logs:
-                log["_id"] = str(log["_id"])
+                log["id"] = str(log["_id"]) if "_id" in log else log.get("id")
+                if "_id" in log:
+                    del log["_id"]
+                if "timestamp" in log and not isinstance(log["timestamp"], str):
+                    try:
+                        log["timestamp"] = log["timestamp"].isoformat() + "Z"
+                    except Exception:
+                        log["timestamp"] = str(log["timestamp"])
             return logs
         except Exception as e:
             print(f"❌ Erro ao buscar logs por origem: {e}")
