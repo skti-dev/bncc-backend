@@ -1,149 +1,131 @@
-# BCNN Backend API
+## 🚀 BCNN Backend API
 
-API para gerenciamento de questões do BCNN (Base Comum Nacional de Currículos).
+API para gerenciamento de questões alinhadas à Base Comum Nacional de Currículos (BCNN).
 
-## 🚀 Como iniciar a aplicação
+## 💡 O que é a aplicação
 
-### 1. Instalar dependências
+Esta API fornece endpoints para cadastrar, consultar e gerenciar questões pedagógicas (questões de prova/exercício), incluindo autenticação de usuários e logging centralizado de todos os consumos em uma coleção MongoDB (`LOGS`). A aplicação foi construída para ser leve, extensível e fácil de integrar em ferramentas de autoria e plataformas educacionais.
 
-```bash
+## ⚙️ Como iniciar
+
+1. Instale as dependências:
+
+```powershell
 pip install -r requirements.txt
 ```
 
-### 2. Configurar variáveis de ambiente
+2. Crie um arquivo `.env` na raiz do projeto e informe as chaves necessárias (NÃO inclua valores aqui no README):
 
-Crie um arquivo `.env` na raiz do projeto:
+- `MONGODB_PASS`
+- `DATABASE_NAME`
+- `MONGODB_USER`
+- `MONGODB_HOST`
+- `SECRET_KEY`
+- `ALGORITHM`
+- `ACCESS_TOKEN_EXPIRE_MINUTES`
 
-```env
-MONGODB_PASS=sua_senha_mongodb
-DATABASE_NAME=bcnn_database
+Observação: mantenha esses valores seguros e fora do controle de versão. Use um ambiente virtual (venv/virtualenv) por projeto para evitar conflitos de dependências.
+
+## ▶️ Como iniciar e acessar a aplicação
+
+Executar em desenvolvimento (exemplo):
+
+```powershell
+# a partir da raiz do projeto
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 3. Iniciar a aplicação
+Após iniciado consuma as rotas a partir de:
 
-```bash
-# Opção 1: Usando Python diretamente
-python main.py
+- API: http://localhost:8000
 
-# Opção 2: Usando uvicorn (recomendado para desenvolvimento)
-uvicorn main:app --reload
+Obs.: a aplicação também pode ser iniciada diretamente com `python main.py` (executa uvicorn internamente).
 
-# Opção 3: Usando uvicorn com configurações específicas
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
+## 🔐 Autenticação
 
-### 4. Acessar a aplicação
+- O login é feito via endpoint `/auth/login` e fornece um cookie HTTP-only chamado `access_token` que deve ser enviado em requisições subsequentes.
+- Por padrão, todas as rotas (exceto `/`, `/health` e `/auth/login`) exigem autenticação via esse cookie.
 
-- **API**: http://localhost:8000
-- **Documentação automática**: http://localhost:8000/docs
-- **Documentação ReDoc**: http://localhost:8000/redoc
+## 🧭 Rotas disponíveis (método — path — parâmetros)
 
-## 📋 Rotas disponíveis
+Nota: a lista abaixo indica os parâmetros esperados (query/path/body). Não inclui a estrutura de retorno.
 
-### Health Check
+- GET `/` — sem parâmetros (health básico)
+- GET `/health` — sem parâmetros (health detalhado; checa conexão com MongoDB)
+- Autenticação
 
-- **GET** `/` - Verificação básica da API
-- **GET** `/health` - Verificação detalhada (inclui status do MongoDB)
+  - POST `/auth/login` — body: `email`, `senha`
+  - GET `/auth/me` — sem parâmetros (retorna usuário atual; requer cookie `access_token`)
+  - POST `/auth/logout` — sem parâmetros (remove cookie de sessão)
 
-### Questões
+- Questões (`/questoes`)
 
-- **POST** `/questoes/adicionar` - Adiciona uma nova questão
-- **GET** `/questoes/{id}` - Busca uma questão específica pelo ID
-- **POST** `/questoes/adicionar` - Adiciona uma nova questão
+  - GET `/questoes/` — query: `page` (int, >=1, obrigatório), `limit` (int, default 10, 1..20), `disciplina` (opcional, enum)
+  - GET `/questoes/{questao_id}` — path: `questao_id` (string)
+  - POST `/questoes/adicionar` — body: objeto com dados da questão (modelo `QuestaoCreate`)
 
-## 📝 Exemplo de uso
+- Logs (`/logs`)
 
-### Adicionar uma questão
+  - GET `/logs/` — query: `page` (int, default 1), `limit` (int, default 50, max 200), `origem` (opcional), `resultado` (opcional)
 
-**Endpoint**: `POST /questoes/adicionar`
+Consulte a documentação interativa em `/docs` para ver os modelos (schemas) e exemplos de body quando necessário.
 
-**Body**:
+## 🗂️ Estrutura do projeto
 
-```json
-{
-  "disciplina": {
-    "codigo": "MAT001",
-    "nome": "Matemática"
-  },
-  "ano": {
-    "codigo": 9,
-    "descricao": "9º Ano do Ensino Fundamental"
-  },
-  "codigo_habilidade": "EF09MA01",
-  "questao": {
-    "tipo": "multipla_escolha",
-    "enunciado": "Qual é o resultado da expressão 2x + 3 quando x = 5?",
-    "alternativas": [
-      { "letra": "A", "texto": "10" },
-      { "letra": "B", "texto": "13" },
-      { "letra": "C", "texto": "15" },
-      { "letra": "D", "texto": "8" }
-    ],
-    "gabarito": "B",
-    "explicacao": "Substituindo x = 5 na expressão: 2(5) + 3 = 10 + 3 = 13"
-  },
-  "metadados": {
-    "nivel_dificuldade": "medio",
-    "tempo_estimado_segundos": 120,
-    "tags": ["algebra", "expressoes", "substituicao"]
-  }
-}
-```
-
-**Resposta**:
-
-```json
-{
-  "message": "Questão adicionada com sucesso!",
-  "questao_id": "674f8a1b2c3d4e5f67890abc",
-  "questao": {
-    "_id": "674f8a1b2c3d4e5f67890abc",
-    "disciplina": {...},
-    "ano": {...},
-    "codigo_habilidade": "EF09MA01",
-    "questao": {...},
-    "metadados": {...},
-    "created_at": "2024-12-03T10:30:00.000Z",
-    "updated_at": "2024-12-03T10:30:00.000Z"
-  }
-}
-```
-
-## 🏗️ Estrutura do projeto
+Estrutura principal (resumida):
 
 ```
 Backend BCNN/
-├── .env                    # Variáveis de ambiente
-├── main.py                 # Arquivo principal da aplicação
-├── connection.py           # Conexão com MongoDB
-├── requirements.txt        # Dependências
-├── config/
-│   └── settings.py        # Configurações centralizadas
-├── models/
-│   └── questao_model.py   # Modelos de dados
-├── routers/
-│   └── questao_routes.py  # Rotas da API
-├── services/
-│   ├── log_service.py     # Serviço de logging
-│   └── questao_service.py # Lógica de negócio das questões
-└── examples/
-    └── questoes_adicionar.json # Exemplo de JSON para adicionar questões
+├─ main.py                      # Entrypoint da app (FastAPI + middleware)
+├─ connection.py                # Conexão com MongoDB (pymongo + opcional Motor)
+├─ requirements.txt             # Dependências do projeto
+├─ README.md                    # Este arquivo
+├─ config/
+│  └─ settings.py               # Configurações e nomes de variáveis de ambiente
+├─ routers/
+│  ├─ api_routes.py             # Router raiz (include outros routers)
+│  ├─ auth_routes.py            # Rotas de autenticação (login, logout, me)
+│  ├─ questao_routes.py         # Rotas para CRUD/listagem de questões
+│  └─ logs_routes.py            # Rotas para consulta de logs
+├─ models/
+│  └─ questao_model.py          # Modelos Pydantic (QuestaoCreate, QuestaoResponse, enums)
+├─ services/
+│  ├─ auth_service.py           # Lógica de autenticação e token JWT
+│  ├─ questao_service.py        # Regras de negócio das questões
+│  ├─ log_service.py            # Serviço de logging síncrono (pymongo)
+│  ├─ log_service_async.py      # Serviço de logging assíncrono (Motor)
+│  └─ erros.py                  # Exceções customizadas
+├─ dependencies/
+│  └─ auth.py                   # Dependência para obter o usuário atual
+├─ scripts/                      # Scripts utilitários (ex.: geradores, imports)
+└─ examples/                     # Exemplos de payloads JSON
 ```
 
-## 📊 Logs
+## 📝 Logs
 
-Todos os consumos da API são automaticamente logados na coleção `LOGS` do MongoDB, incluindo:
+- Todos os consumos da API são registrados na coleção MongoDB indicada por `LOG_COLLECTION` (por padrão `LOGS`).
+- Cada documento de log inclui, tipicamente:
+  - `origem_consumo` (origem do request — p.ex. IP ou identificador de middleware)
+  - `resultado_consumo` (ex.: `sucesso`, `erro`, `unauthenticated`, `preflight`)
+  - `endpoint` (rota acessada)
+  - `detalhes` (objeto com dados adicionais da operação — method, path, query, usuário, mensagens, exceções)
+  - `timestamp`
 
-- Origem do consumo (IP)
-- Resultado (sucesso/erro)
-- Endpoint acessado
-- Detalhes da operação
-- Timestamp
+Importante: antes de logar, avalie a necessidade de mascarar ou não inserir dados sensíveis no campo `detalhes` (PII, tokens, senhas). O projeto já evita inserir senhas em logs, mas revise conforme sua política de segurança.
 
-## 🔧 Tecnologias utilizadas
+## 🛠️ Tecnologias utilizadas
 
-- **FastAPI** - Framework web
-- **MongoDB** - Banco de dados
-- **Pydantic** - Validação de dados
-- **Uvicorn** - Servidor ASGI
-- **python-dotenv** - Gerenciamento de variáveis de ambiente
+- Python 3.11/3.12
+- FastAPI — framework web ASGI
+- Uvicorn — servidor ASGI
+- PyMongo — cliente MongoDB síncrono
+- Motor — cliente MongoDB assíncrono (opcional, usado pelo serviço de logs assíncronos)
+- Pydantic (v2) — validação e serialização de modelos
+- python-dotenv — carregamento de variáveis de ambiente
+- passlib / bcrypt — hashing de senhas (dependência do auth)
+
+## ⚠️ Observações finais
+
+- Recomenda-se rodar a aplicação em um ambiente virtual isolado (venv/virtualenv) para evitar conflitos de dependências com outras ferramentas instaladas globalmente.
+
+Desenvolvido por Augusto Seabra
