@@ -14,6 +14,7 @@ log_service = LogService()
 questoes_endpoint = "/questoes"
 
 @router.get("/", response_model=Union[List[QuestaoResponse], dict])
+@router.get("", response_model=Union[List[QuestaoResponse], dict])
 async def listar_questoes(
     request: Request,
     page: int = Query(..., ge=1),

@@ -6,6 +6,7 @@ from typing import Optional
 router = APIRouter(prefix="/logs", tags=["logs"])
 
 @router.get("/", response_model=list)
+@router.get("", response_model=list)  # Aceita sem trailing slash também
 async def listar_logs(page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=200), origem: Optional[str] = None, resultado: Optional[str] = None):
     """Lista logs com paginação e filtragem simples"""
     skip = (page - 1) * limit
