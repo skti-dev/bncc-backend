@@ -3,6 +3,7 @@ from models.questao_model import QuestaoCreate, QuestaoResponse
 from services.questao_service import QuestaoService
 from services.log_service import LogService
 from typing import Optional, Union, List
+import random
 
 from models.questao_model import DisciplinaEnum
 
@@ -18,12 +19,14 @@ async def listar_questoes(
     page: int = Query(..., ge=1),
     limit: int = Query(10, ge=1, le=20),
     disciplina: Optional[DisciplinaEnum] = Query(None),
+    ano: Optional[str] = Query(None),
+    shuffle: bool = Query(False)
 ):
     """Lista todas as questões"""
     origem = request.client.host
     
     try:
-        paginated = questao_service.listar_questoes_paginated(page=page, limit=limit, disciplina=(disciplina.value if disciplina else None))
+        paginated = questao_service.listar_questoes_paginated(page=page, limit=limit, disciplina=(disciplina.value if disciplina else None), ano=ano, shuffle=shuffle)
 
         total_pages = paginated.get("totalPages", 0)
         if total_pages == 0 or page > total_pages:
@@ -34,12 +37,18 @@ async def listar_questoes(
                 detalhes={"page": page, "out_of_range": True, "total": paginated.get('total', 0)}
             )
             return []
+        
+        
+        if shuffle and isinstance(paginated, dict) and "data" in paginated:
+            questoes_data = paginated["data"]
+            random.shuffle(questoes_data)
+            paginated["data"] = questoes_data
 
         log_service.log_consumo(
             origem_consumo=origem,
             resultado_consumo="sucesso",
             endpoint=questoes_endpoint,
-            detalhes={"page": page, "limit": limit, "disciplina": str(disciplina) if disciplina else None, "total": paginated.get('total', 0)}
+            detalhes={"page": page, "limit": limit, "disciplina": str(disciplina) if disciplina else None, "total": paginated.get('total', 0), "shuffle": shuffle},
         )
 
         return paginated

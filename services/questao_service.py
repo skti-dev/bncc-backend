@@ -82,8 +82,16 @@ class QuestaoService:
         except Exception as e:
             raise ServiceError(f"Erro ao listar questões: {str(e)}")
 
-    def _build_query(self, disc: str | None) -> dict:
-        return {"disciplina": disc} if disc else {}
+    def _build_query(self, disc: str | None, ano: str | None) -> dict:
+        query = {}
+    
+        if disc:
+            query["disciplina"] = disc
+        
+        if ano:
+            query["ano"] = ano
+        
+        return query
 
     def _calc_total_pages(self, total: int, lim: int) -> int:
         return (total + lim - 1) // lim if total > 0 else 0
@@ -103,8 +111,8 @@ class QuestaoService:
         qr = QuestaoResponse.model_validate(doc)
         return qr.model_dump(mode="json")
 
-    def listar_questoes_paginated(self, page: int, limit: int, disciplina: str | None = None):
-        """Lista questões com paginação e filtro opcional por disciplina.
+    def listar_questoes_paginated(self, page: int, limit: int, disciplina: str | None = None, ano: str | None = None, shuffle: bool = False) -> dict:
+        """Lista questões com paginação e filtro opcional por disciplina e ano.
 
         Retorna um dict: { 'total': int, 'totalPages': int, 'page': int, 'limit': int, 'data': list }
         """
@@ -113,17 +121,38 @@ class QuestaoService:
             if page < 1:
                 return {"total": 0, "totalPages": 0, "page": page, "limit": limit, "data": []}
 
-            query = self._build_query(disciplina)
+            query = self._build_query(disciplina, ano)
+            
             total = self.collection.count_documents(query)
             total_pages = self._calc_total_pages(total, limit)
+            
+            if shuffle:
+                pipeline = []
+                
+                if query:
+                    pipeline.append({"$match": query})
+                
+                pipeline.extend([
+                    {"$addFields": {"random": {"$rand": {}}}},
+                    {"$sort": {"random": 1}}
+                ])
+                
+                skip = (page - 1) * limit
+                pipeline.extend([
+                    {"$skip": skip},
+                    {"$limit": limit}
+                ])
+                
+                cursor = self.collection.aggregate(pipeline)
+                data = [self._normalize_and_serialize(q) for q in cursor]
+                
+            else:
+                if total_pages > 0 and page > total_pages:
+                    return {"total": total, "totalPages": total_pages, "page": page, "limit": limit, "data": []}
 
-            if total_pages > 0 and page > total_pages:
-                return {"total": total, "totalPages": total_pages, "page": page, "limit": limit, "data": []}
-
-            skip = (page - 1) * limit
-            cursor = self.collection.find(query).skip(skip).limit(limit)
-
-            data = [self._normalize_and_serialize(q) for q in cursor]
+                skip = (page - 1) * limit
+                cursor = self.collection.find(query).skip(skip).limit(limit)
+                data = [self._normalize_and_serialize(q) for q in cursor]
 
             return {
                 "total": total,
