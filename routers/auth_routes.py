@@ -52,7 +52,23 @@ async def login(payload: LoginRequest, response: Response, request: Request):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     token = result["access_token"]
-    response.set_cookie(key="access_token", value=token, httponly=True, secure=False, samesite="none")
+    # dev:
+    # response.set_cookie(
+    #     key="access_token",
+    #     value=token,
+    #     httponly=True,
+    #     secure=False,        # HTTP simples
+    #     samesite="lax",      # permite login local e chamadas do mesmo domínio
+    # )
+    
+    #prod:
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="none",     # para aceitar chamadas de domínios diferentes (ex: app mobile)
+    )
 
     detalhes = {"email": payload.email, "result": "success", "user": result.get("user")}
     try:

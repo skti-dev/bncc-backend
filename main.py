@@ -21,10 +21,10 @@ app = FastAPI(
     version=settings.API_VERSION,
 )
 
-# Configurar CORS
+# CONFIGURAÇÃO CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Em produção, especifique domínios específicos
+    allow_origins=["*"],  # Ajustar depois..
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
