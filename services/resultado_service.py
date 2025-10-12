@@ -53,7 +53,7 @@ class ResultadoService:
         except Exception as e:
             raise ServiceError(f"Erro ao listar resultados: {str(e)}")
 
-    def _build_query(self, disciplina: str | None, ano: int | None) -> dict:
+    def _build_query(self, disciplina: str | None, ano: int | None, email: str | None) -> dict:
         """Constrói query de filtro"""
         query = {}
         
@@ -62,6 +62,9 @@ class ResultadoService:
         
         if ano:
             query["ano"] = ano
+            
+        if email:
+            query["email"] = email
         
         return query
 
@@ -85,14 +88,14 @@ class ResultadoService:
         resultado_response = ResultadoResponse.model_validate(doc)
         return resultado_response.model_dump(mode="json")
 
-    def listar_resultados_paginated(self, page: int, limit: int, disciplina: str | None = None, ano: int | None = None) -> dict:
-        """Lista resultados com paginação e filtro opcional por disciplina e ano"""
+    def listar_resultados_paginated(self, page: int, limit: int, disciplina: str | None = None, ano: int | None = None, email: str | None = None) -> dict:
+        """Lista resultados com paginação e filtro opcional por disciplina, ano e email"""
         
         try:
             if page < 1:
                 return {"total": 0, "totalPages": 0, "page": page, "limit": limit, "data": []}
 
-            query = self._build_query(disciplina, ano)
+            query = self._build_query(disciplina, ano, email)
             
             total = self.collection.count_documents(query)
             total_pages = self._calc_total_pages(total, limit)

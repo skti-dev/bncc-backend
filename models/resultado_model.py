@@ -12,6 +12,7 @@ class QuestionResult(BaseModel):
 
 
 class ResultadoCreate(BaseModel):
+    email: str = Field(..., description="Email do aluno que respondeu")
     disciplina: str = Field(..., description="Disciplina do resultado")
     ano: int = Field(..., ge=1, le=12, description="Ano escolar")
     respostas: List[QuestionResult] = Field(..., description="Lista de respostas")
@@ -21,6 +22,7 @@ class ResultadoCreate(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
+                "email": "aluno@exemplo.com",
                 "disciplina": "LP",
                 "ano": 5,
                 "respostas": [
@@ -40,6 +42,7 @@ class ResultadoCreate(BaseModel):
 
 class ResultadoResponse(BaseModel):
     id: str = Field(..., description="ID do resultado")
+    email: str = Field(..., description="Email do aluno que respondeu")
     disciplina: str = Field(..., description="Disciplina do resultado")
     ano: int = Field(..., description="Ano escolar")
     respostas: List[QuestionResult] = Field(..., description="Lista de respostas")
@@ -53,6 +56,7 @@ class ResultadoResponse(BaseModel):
         json_schema_extra = {
             "example": {
                 "id": "674f8a1b2c3d4e5f67890abc",
+                "email": "aluno@exemplo.com",
                 "disciplina": "LP",
                 "ano": 5,
                 "respostas": [
