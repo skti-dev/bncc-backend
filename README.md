@@ -60,9 +60,15 @@ Nota: a lista abaixo indica os parâmetros esperados (query/path/body). Não inc
 
 - Questões (`/questoes`)
 
-  - GET `/questoes/` — query: `page` (int, >=1, obrigatório), `limit` (int, default 10, 1..20), `disciplina` (opcional, enum)
+  - GET `/questoes/` — query: `page` (int, >=1, obrigatório), `limit` (int, default 10, 1..20), `disciplina` (opcional, enum), `ano` (opcional, string), `shuffle` (bool, default false)
   - GET `/questoes/{questao_id}` — path: `questao_id` (string)
   - POST `/questoes/adicionar` — body: objeto com dados da questão (modelo `QuestaoCreate`)
+
+- Resultados (`/resultados`)
+
+  - PUT `/resultados/` — body: objeto com dados do resultado (modelo `ResultadoCreate`) - `disciplina`, `ano`, `respostas`, `pontuacao`, `total_questoes`
+  - GET `/resultados/` — query: `page` (int, default 1), `limit` (int, default 10, 1..50), `disciplina` (opcional, string), `ano` (opcional, int, 1..12)
+  - GET `/resultados/{resultado_id}` — path: `resultado_id` (string)
 
 - Logs (`/logs`)
 
@@ -86,12 +92,15 @@ Backend BCNN/
 │  ├─ api_routes.py             # Router raiz (include outros routers)
 │  ├─ auth_routes.py            # Rotas de autenticação (login, logout, me)
 │  ├─ questao_routes.py         # Rotas para CRUD/listagem de questões
+│  ├─ resultado_routes.py       # Rotas para salvar/consultar resultados de provas
 │  └─ logs_routes.py            # Rotas para consulta de logs
 ├─ models/
-│  └─ questao_model.py          # Modelos Pydantic (QuestaoCreate, QuestaoResponse, enums)
+│  ├─ questao_model.py          # Modelos Pydantic (QuestaoCreate, QuestaoResponse, enums)
+│  └─ resultado_model.py        # Modelos Pydantic (ResultadoCreate, ResultadoResponse, QuestionResult)
 ├─ services/
 │  ├─ auth_service.py           # Lógica de autenticação e token JWT
 │  ├─ questao_service.py        # Regras de negócio das questões
+│  ├─ resultado_service.py      # Regras de negócio dos resultados (com cálculo automático de percentual)
 │  ├─ log_service.py            # Serviço de logging síncrono (pymongo)
 │  ├─ log_service_async.py      # Serviço de logging assíncrono (Motor)
 │  └─ erros.py                  # Exceções customizadas
