@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, HTTPException, status, Response, Depends, Request
 from pydantic import BaseModel, EmailStr
 from fastapi.concurrency import run_in_threadpool
@@ -52,23 +53,25 @@ async def login(payload: LoginRequest, response: Response, request: Request):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     token = result["access_token"]
-    # dev:
-    # response.set_cookie(
-    #     key="access_token",
-    #     value=token,
-    #     httponly=True,
-    #     secure=False,        # HTTP simples
-    #     samesite="lax",      # permite login local e chamadas do mesmo domínio
-    # )
     
-    #prod:
-    response.set_cookie(
-        key="access_token",
-        value=token,
-        httponly=True,
-        secure=True,
-        samesite="none",     # para aceitar chamadas de domínios diferentes (ex: app mobile)
-    )
+    ENV = os.getenv("ENV", "dev")   
+
+    if ENV == "prod":
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            secure=True,
+            samesite="none",
+        )
+    else:
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+        )
 
     detalhes = {"email": payload.email, "result": "success", "user": result.get("user")}
     try:
