@@ -1,12 +1,10 @@
-import os
 from fastapi import APIRouter, HTTPException, status, Response, Depends, Request
 from pydantic import BaseModel, EmailStr
-from fastapi.concurrency import run_in_threadpool
+import os
 
 from services.auth_service import AuthService
 from services.erros import ValidationError, NotFoundError
 from dependencies.auth import get_current_user
-from services.log_service import LogService
 from services.log_service_async import LogServiceAsync
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -24,8 +22,6 @@ class LoginRequest(BaseModel):
 @router.post('/login')
 async def login(payload: LoginRequest, response: Response, request: Request):
     origem = request.client.host if request.client else 'auth'
-
-    sync_log = LogService()
     async_log = LogServiceAsync()
 
     service = AuthService()
@@ -36,8 +32,6 @@ async def login(payload: LoginRequest, response: Response, request: Request):
         try:
             if async_log.collection is not None:
                 await async_log.log_consumo(origem_consumo=origem, resultado_consumo='erro', endpoint=AUTH_LOGIN, detalhes=detalhes)
-            else:
-                await run_in_threadpool(sync_log.log_consumo, origem, 'erro', AUTH_LOGIN, detalhes)
         except Exception:
             pass
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
@@ -46,8 +40,6 @@ async def login(payload: LoginRequest, response: Response, request: Request):
         try:
             if async_log.collection is not None:
                 await async_log.log_consumo(origem_consumo=origem, resultado_consumo='erro', endpoint=AUTH_LOGIN, detalhes=detalhes)
-            else:
-                await run_in_threadpool(sync_log.log_consumo, origem, 'erro', AUTH_LOGIN, detalhes)
         except Exception:
             pass
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
@@ -77,8 +69,6 @@ async def login(payload: LoginRequest, response: Response, request: Request):
     try:
         if async_log.collection is not None:
             await async_log.log_consumo(origem_consumo=origem, resultado_consumo='sucesso', endpoint=AUTH_LOGIN, detalhes=detalhes)
-        else:
-            await run_in_threadpool(sync_log.log_consumo, origem, 'sucesso', AUTH_LOGIN, detalhes)
     except Exception:
         pass
 
@@ -88,15 +78,12 @@ async def login(payload: LoginRequest, response: Response, request: Request):
 @router.get('/me')
 async def me(request: Request, current_user: dict = Depends(get_current_user)):
     origem = request.client.host if request.client else 'auth'
-
-    sync_log = LogService()
     async_log = LogServiceAsync()
+    
     detalhes = {"action": "me", "user": current_user}
     try:
         if async_log.collection is not None:
             await async_log.log_consumo(origem_consumo=origem, resultado_consumo='sucesso', endpoint=AUTH_ME, detalhes=detalhes)
-        else:
-            await run_in_threadpool(sync_log.log_consumo, origem, 'sucesso', AUTH_ME, detalhes)
     except Exception:
         pass
 
@@ -106,14 +93,12 @@ async def me(request: Request, current_user: dict = Depends(get_current_user)):
 @router.post('/logout')
 async def logout(request: Request, response: Response):
     origem = request.client.host if request.client else 'auth'
-    sync_log = LogService()
     async_log = LogServiceAsync()
+    
     detalhes = {"action": "logout"}
     try:
         if async_log.collection is not None:
             await async_log.log_consumo(origem_consumo=origem, resultado_consumo='sucesso', endpoint=AUTH_LOGOUT, detalhes=detalhes)
-        else:
-            await run_in_threadpool(sync_log.log_consumo, origem, 'sucesso', AUTH_LOGOUT, detalhes)
     except Exception:
         pass
 
