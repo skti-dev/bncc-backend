@@ -24,10 +24,7 @@ app = FastAPI(
 # CONFIGURAÇÃO CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8081",
-        "https://enhancing-desired-efforts-reseller.trycloudflare.com",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -73,6 +70,9 @@ async def _log_unhandled_exception(log_svc_async, sync_svc, path: str, query: st
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    if request.url.path in ["/openapi.json", "/docs", "/redoc"]:
+        return await call_next(request)
+    
     start_time = time.time()
     allow_paths = {"/", "/health", "/auth/login"}
     allow_prefixes = ()

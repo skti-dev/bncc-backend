@@ -57,22 +57,19 @@ Nota: a lista abaixo indica os parâmetros esperados (query/path/body). Não inc
   - POST `/auth/login` — body: `email`, `senha`
   - GET `/auth/me` — sem parâmetros (retorna usuário atual; requer cookie `access_token`)
   - POST `/auth/logout` — sem parâmetros (remove cookie de sessão)
-
 - Questões (`/questoes`)
 
   - GET `/questoes/` — query: `page` (int, >=1, obrigatório), `limit` (int, default 10, 1..20), `disciplina` (opcional, enum), `ano` (opcional, string), `shuffle` (bool, default false)
   - GET `/questoes/{questao_id}` — path: `questao_id` (string)
   - POST `/questoes/adicionar` — body: objeto com dados da questão (modelo `QuestaoCreate`)
-
 - Resultados (`/resultados`)
 
   - PUT `/resultados/` — body: objeto com dados do resultado (modelo `ResultadoCreate`) - `email`, `disciplina`, `ano`, `respostas`, `pontuacao`, `total_questoes`
   - GET `/resultados/` — query: `page` (int, default 1), `limit` (int, default 10, 1..50), `disciplina` (opcional, string), `ano` (opcional, int, 1..12), `email` (opcional, string)
   - GET `/resultados/{resultado_id}` — path: `resultado_id` (string)
-
 - Logs (`/logs`)
 
-  - GET `/logs/` — query: `page` (int, default 1), `limit` (int, default 50, max 200), `origem` (opcional), `resultado` (opcional)
+  - GET `/logs` — query: `page` (int, default 1), `limit` (int, default 50, max 200), `origem` (opcional), `resultado` (opcional)
 
 Consulte a documentação interativa em `/docs` para ver os modelos (schemas) e exemplos de body quando necessário.
 

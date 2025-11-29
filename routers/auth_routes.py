@@ -48,22 +48,22 @@ async def login(payload: LoginRequest, response: Response, request: Request):
     
     ENV = os.getenv("ENV", "dev")   
 
-    # if ENV == "prod":
-    response.set_cookie(
-        key="access_token",
-        value=token,
-        httponly=True,
-        secure=True,
-        samesite="none",
-    )
-    # else:
-    #     response.set_cookie(
-    #         key="access_token",
-    #         value=token,
-    #         httponly=True,
-    #         secure=False,
-    #         samesite="lax",
-    #     )
+    if ENV == "prod":
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            secure=True,
+            samesite="none",
+        )
+    else:
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+        )
 
     detalhes = {"email": payload.email, "result": "success", "user": result.get("user")}
     try:
