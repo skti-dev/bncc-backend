@@ -26,7 +26,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8081",
-        "https://enhancing-desired-efforts-reseller.trycloudflare.com/",
+        "https://enhancing-desired-efforts-reseller.trycloudflare.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
