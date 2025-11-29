@@ -24,7 +24,10 @@ app = FastAPI(
 # CONFIGURAÇÃO CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Ajustar depois..
+    allow_origins=[
+        "http://localhost:8081",
+        "https://enhancing-desired-efforts-reseller.trycloudflare.com/",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
