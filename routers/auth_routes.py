@@ -45,25 +45,6 @@ async def login(payload: LoginRequest, response: Response, request: Request):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     token = result["access_token"]
-    
-    ENV = os.getenv("ENV", "dev")   
-
-    if ENV == "prod":
-        response.set_cookie(
-            key="access_token",
-            value=token,
-            httponly=True,
-            secure=True,
-            samesite="none",
-        )
-    else:
-        response.set_cookie(
-            key="access_token",
-            value=token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-        )
 
     detalhes = {"email": payload.email, "result": "success", "user": result.get("user")}
     try:
@@ -72,7 +53,7 @@ async def login(payload: LoginRequest, response: Response, request: Request):
     except Exception:
         pass
 
-    return {"message": "Login realizado", "user": result["user"]}
+    return {"message": "Login realizado", "user": result["user"], "access_token": token}
 
 
 @router.get('/me')
@@ -91,7 +72,7 @@ async def me(request: Request, current_user: dict = Depends(get_current_user)):
 
 
 @router.post('/logout')
-async def logout(request: Request, response: Response):
+async def logout(request: Request):
     origem = request.client.host if request.client else 'auth'
     async_log = LogServiceAsync()
     
@@ -102,5 +83,4 @@ async def logout(request: Request, response: Response):
     except Exception:
         pass
 
-    response.delete_cookie(key="access_token", path="/")
     return {"message": "Logout realizado"}

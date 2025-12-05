@@ -97,10 +97,11 @@ async def log_requests(request: Request, call_next):
         return response
 
     if not (path in allow_paths or any(path.startswith(p) for p in allow_prefixes)):
-        access_token = request.cookies.get("access_token")
-        if not access_token:
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
             await _log_unauthenticated(async_log_service, sync_log_service, request, path, query, client_host)
             return JSONResponse(status_code=401, content={"error": {"code": 401, "message": "Not authenticated"}})
+        access_token = auth_header[7:]  # Remove 'Bearer '
         try:
             payload = decode_token(access_token)
             user_id = payload.get("sub")
