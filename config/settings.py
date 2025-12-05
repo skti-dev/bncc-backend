@@ -11,8 +11,8 @@ class Settings:
     MONGODB_HOST = os.getenv('MONGODB_HOST', 'db-pi-v.b1go26j.mongodb.net')
     
     # API
-    API_TITLE = "BCNN Backend API"
-    API_DESCRIPTION = "API para gerenciamento de questões do BCNN"
+    API_TITLE = "BNCC Backend API"
+    API_DESCRIPTION = "API para gerenciamento de questões do BNCC"
     API_VERSION = "1.0.0"
     
     # Collections

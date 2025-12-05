@@ -1,6 +1,6 @@
-## 🚀 BCNN Backend API
+## 🚀 BNCC Backend API
 
-API para gerenciamento de questões alinhadas à Base Comum Nacional de Currículos (BCNN).
+API para gerenciamento de questões alinhadas à Base Comum Nacional de Currículos (BNCC).
 
 ## 💡 O que é a aplicação
 
@@ -43,7 +43,7 @@ Obs.: a aplicação também pode ser iniciada diretamente com `python main.py` (
 
 ## 🔐 Autenticação
 
-- O login é feito via endpoint `/auth/login` e fornece um cookie HTTP-only chamado `access_token` que deve ser enviado em requisições subsequentes.
+- O login é feito via endpoint `/auth/login` e fornece um JWT chamado `access_token` que deve ser enviado em requisições subsequentes.
 - Por padrão, todas as rotas (exceto `/`, `/health` e `/auth/login`) exigem autenticação via esse cookie.
 
 ## 🧭 Rotas disponíveis (método — path — parâmetros)
@@ -78,7 +78,7 @@ Consulte a documentação interativa em `/docs` para ver os modelos (schemas) e 
 Estrutura principal (resumida):
 
 ```
-Backend BCNN/
+Backend BNCC/
 ├─ main.py                      # Entrypoint da app (FastAPI + middleware)
 ├─ connection.py                # Conexão com MongoDB (pymongo + opcional Motor)
 ├─ requirements.txt             # Dependências do projeto

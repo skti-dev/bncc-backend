@@ -181,7 +181,7 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def startup_event():
-    print("Starting BCNN Backend API...")
+    print("Starting BNCC Backend API...")
     if test_connection():
         print("Connection to MongoDB established!")
     else:
