@@ -76,7 +76,7 @@ async def log_requests(request: Request, call_next):
         return await call_next(request)
     
     start_time = time.time()
-    allow_paths = {"/", "/health", "/auth/login"}
+    allow_paths = {"/", "/health", "/auth/login", "/auth/logout"}
     allow_prefixes = ()
 
     request.state.user = None
