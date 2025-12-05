@@ -72,7 +72,7 @@ async def _log_unhandled_exception(log_svc_async, sync_svc, path: str, query: st
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    if request.url.path in ["/openapi.json", "/docs", "/redoc"]:
+    if request.url.path in ["/openapi.json", "/docs", "/redoc", "/api/docs"]:
         return await call_next(request)
     
     start_time = time.time()
